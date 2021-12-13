@@ -32,7 +32,14 @@ log_rotate(){
                 EXT=${LOG_R:(-4)}
                 if [ "$EXT" = ".log" ] || [[ "$LOG_R" =~ (.*mainlog$|.*rejectlog$|.*paniclog$) ]] ; then
                         size="$(stat -c %s "$LOG_R")"
-			mod_date="$(stat -c %Y "$LOG_R")"
+			# check if the exists the first rotated log file
+			# and catch the modified date.
+			# otherwise set the modified date to the 01 Jan 1970 first second ;-)
+			if [ -f "$LOG_R".1.gz ]; then
+				mod_date="$(stat -c %Y "$LOG_R".1.gz)"
+			else
+				mod_date=1
+			fi
 			retention_date="$[$mod_date + $[$DAYS_2_ROTATE * 3600 * 24]]"
 			today_epoch="$(date +%s)"
 			debug "$LOG_R file size: $size, mod_date=$mod_date, retention_date=$retention_date, today_epoch=$today_epoch"
@@ -51,7 +58,7 @@ log_rotate(){
                         else
                                 if [ -f "$LOG_R" ]; then
 					if [ $today_epoch -le $retention_date ]; then
-						log "$LOG_R is not enough old to be rotated"
+						log "$LOG_R.1.gz is not enough old to be rotated"
 					else
 	                                        log "$LOG_R has size < $LOG_SIZE bytes, not rotating"
 					fi

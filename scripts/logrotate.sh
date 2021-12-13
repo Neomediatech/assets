@@ -1,8 +1,20 @@
 #!/bin/bash
 
+LOG_SIZE=10485760 # after this size (in byte) the log is rotated
+DAYS_2_ROTATE=7   # but only after these days has been passed
+RETENTION=52      # how many logs to keep?
+
+DEBUG=0	# 1=enable verbose logging, 0=normal logging
+
 log(){
         echo -n "$(date +%a" "%d-%m-%Y" "%H:%M:%S) --- "
         echo "$1"
+}
+
+debug(){
+	if [ $DEBUG -eq 1 ]; then
+		log "$1"
+	fi
 }
 
 if [ -z "$1" ]; then
@@ -20,8 +32,12 @@ log_rotate(){
                 EXT=${LOG_R:(-4)}
                 if [ "$EXT" = ".log" ] || [[ "$LOG_R" =~ (.*mainlog$|.*rejectlog$|.*paniclog$) ]] ; then
                         size="$(stat -c %s "$LOG_R")"
-                        if [ -s "$LOG_R" ] && [ $size -gt 10485760 ]; then
-                                for num in $(seq 10 -1 1); do
+			mod_date="$(stat -c %Y "$LOG_R")"
+			retention_date="$[$mod_date + $[$DAYS_2_ROTATE * 3600 * 24]]"
+			today_epoch="$(date +%s)"
+			debug "$LOG_R file size: $size, mod_date=$mod_date, retention_date=$retention_date, today_epoch=$today_epoch"
+                        if [ -s "$LOG_R" ] && [ $size -gt $LOG_SIZE ] && [ $today_epoch -gt $retention_date ]; then
+                                for num in $(seq $[$RETENTION - 1] -1 1); do
                                         if [ -f "$LOG_R".$num.gz ]; then
                                                 mv "$LOG_R".$num.gz "$LOG_R".$[$num+1].gz
                                         fi
@@ -34,13 +50,21 @@ log_rotate(){
                                 fi
                         else
                                 if [ -f "$LOG_R" ]; then
-                                        log "$LOG_R has size < 10 Mb, not rotating"
+					if [ $today_epoch -le $retention_date ]; then
+						log "$LOG_R is not enough old to be rotated"
+					else
+	                                        log "$LOG_R has size < $LOG_SIZE bytes, not rotating"
+					fi
                                 else
                                         log "$LOG_R does not exists"
                                 fi
                         fi
                 else
-                        log "$LOG_R file will not be rotated (for security reason only files with '.log' extensions or 'mainlog|rejectlog|paniclog' names will be parsed"
+			if [[ "$LOG_R" =~ (.*\.gz$) ]] ; then
+				debug "we don't touch $LOG_R"
+			else
+	                        log "$LOG_R file will not be rotated (for security reason only files with '.log' extensions or 'mainlog|rejectlog|paniclog' names will be parsed"
+			fi
                 fi
         fi
 }

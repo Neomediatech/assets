@@ -32,7 +32,7 @@ log_rotate(){
                 EXT=${LOG_R:(-4)}
                 if [ "$EXT" = ".log" ] || [[ "$LOG_R" =~ (.*mainlog$|.*rejectlog$|.*paniclog$) ]] ; then
                         size="$(stat -c %s "$LOG_R")"
-			# check if the exists the first rotated log file
+			# check if exists the first rotated log file
 			# and catch the modified date.
 			# otherwise set the modified date to the 01 Jan 1970 first second ;-)
 			if [ -f "$LOG_R".1.gz ]; then

@@ -1,0 +1,4 @@
+curl 8.15.0 (x86_64-pc-linux-musl) libcurl/8.15.0 OpenSSL/3.5.1
+Release-Date: 2025-07-16
+Protocols: http https ipfs ipns smb smbs ws wss
+Features: alt-svc AsynchDNS HSTS IPv6 Largefile NTLM SSL threadsafe TLS-SRP UnixSockets

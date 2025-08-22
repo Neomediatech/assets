@@ -1,0 +1,23 @@
+GNU Wget 1.25.0 built on linux-musl.
+
+-cares +digest -gpgme +https +ipv6 -iri +large-file -metalink -nls 
++ntlm +opie -psl +ssl/openssl 
+
+Wgetrc: 
+    /etc/wgetrc (system)
+Compile: 
+    clang -DHAVE_CONFIG_H -DSYSTEM_WGETRC="/etc/wgetrc" 
+    -DLOCALEDIR="/opt/wget-1.25.0/share/locale" -I. -I../lib -I../lib 
+    -DHAVE_LIBSSL -DNDEBUG -g -O2 
+Link: 
+    clang -DHAVE_LIBSSL -DNDEBUG -g -O2 -static -lpcre -lssl -lcrypto 
+    -ldl -pthread -lz ../lib/libgnu.a 
+
+Copyright (C) 2015 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later
+<http://www.gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Originally written by Hrvoje Niksic <hniksic@xemacs.org>.
+Please send bug reports and questions to <bug-wget@gnu.org>.
